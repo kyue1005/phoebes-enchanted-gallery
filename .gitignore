@@ -1,0 +1,10 @@
+# macOS metadata
+.DS_Store
+**/.DS_Store
+
+# Keep original, full-resolution artwork photos local
+work/
+
+# Local tooling
+.wrangler/
+node_modules/

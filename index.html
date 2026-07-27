@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A private, playful gallery for a child's artwork.">
+  <title>Phoebe’s Enchanted Gallery</title>
+  <style>
+    :root {
+      --paper: #fff8fc;
+      --paper-deep: #f2e7f5;
+      --ink: #4b354f;
+      --muted: #806e82;
+      --coral: #d978a7;
+      --blue: #9a76c8;
+      --yellow: #efc875;
+      --green: #8eb59a;
+      --line: rgba(75, 53, 79, .16);
+      --shadow: 0 18px 48px rgba(112, 75, 123, .16);
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 18%, rgba(236, 166, 199, .18), transparent 25rem),
+        radial-gradient(circle at 86% 35%, rgba(174, 139, 211, .16), transparent 27rem),
+        var(--paper);
+      font-family: ui-rounded, "Avenir Next", Avenir, "Trebuchet MS", sans-serif;
+      min-height: 100vh;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .23;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");
+      mix-blend-mode: multiply;
+      z-index: 20;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    a { color: inherit; }
+
+    .shell { width: min(1180px, calc(100% - 36px)); margin: 0 auto; }
+    .site-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 84px;
+      border-bottom: 1px solid var(--line);
+      gap: 20px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: -.02em; }
+    .brand-mark { width: 40px; height: 40px; transform: rotate(-4deg); color: var(--blue); }
+    .header-note { color: var(--muted); font-size: .86rem; }
+
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(260px, .65fr);
+      gap: clamp(30px, 8vw, 110px);
+      align-items: end;
+      padding: clamp(66px, 10vw, 128px) 0 50px;
+    }
+    .eyebrow {
+      color: var(--coral);
+      font-size: .78rem;
+      font-weight: 900;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin: 0 0 18px;
+    }
+    h1 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(3.4rem, 8.7vw, 8.1rem);
+      line-height: .83;
+      letter-spacing: -.07em;
+      font-weight: 500;
+      max-width: 900px;
+    }
+    h1 em { color: var(--blue); font-weight: 500; }
+    .intro-copy { padding-bottom: 8px; position: relative; }
+    .intro-copy p { color: var(--muted); font-size: 1.05rem; line-height: 1.65; margin: 0 0 24px; }
+    .fairy-crest {
+      width: 154px;
+      margin: 0 0 20px auto;
+      color: var(--blue);
+      filter: drop-shadow(0 9px 12px rgba(154, 118, 200, .14));
+      animation: float 5s ease-in-out infinite;
+    }
+    .fairy-crest svg { display: block; width: 100%; height: auto; overflow: visible; }
+    @keyframes float { 50% { transform: translateY(-7px) rotate(1deg); } }
+    .upload-label {
+      display: inline-flex;
+      min-height: 46px;
+      align-items: center;
+      gap: 9px;
+      padding: 0 17px;
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      cursor: pointer;
+      background: var(--ink);
+      color: var(--paper);
+      font-weight: 800;
+      transition: transform .18s ease, background .18s ease;
+    }
+    .upload-label:hover { transform: translateY(-2px) rotate(-1deg); background: var(--coral); }
+    .upload-label:focus-within { outline: 3px solid rgba(154,118,200,.3); outline-offset: 3px; }
+    .upload-label input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .privacy-note { display: block; margin-top: 11px; color: var(--muted); font-size: .76rem; }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 20px 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: color-mix(in srgb, var(--paper) 91%, transparent);
+      backdrop-filter: blur(14px);
+    }
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; }
+    .filter {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 13px;
+      min-height: 40px;
+      background: transparent;
+      cursor: pointer;
+      font-size: .84rem;
+      font-weight: 800;
+    }
+    .filter:hover, .filter:focus-visible { border-color: var(--ink); outline: none; }
+    .filter.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .count { color: var(--muted); font-size: .83rem; white-space: nowrap; }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: clamp(28px, 5vw, 68px) clamp(18px, 3vw, 42px);
+      padding: 56px 0 110px;
+      align-items: start;
+    }
+    .art-card { grid-column: span 4; min-width: 0; }
+    .art-card:nth-child(5n + 2) { margin-top: 65px; }
+    .art-card:nth-child(7n + 4) { grid-column: span 5; }
+    .art-card:nth-child(7n + 5) { grid-column: span 3; }
+    .frame {
+      appearance: none;
+      width: 100%;
+      border: 0;
+      padding: clamp(8px, 1.2vw, 14px);
+      background: #fffafd;
+      box-shadow: var(--shadow);
+      cursor: zoom-in;
+      transform: rotate(var(--tilt, 0deg));
+      transition: transform .22s ease, box-shadow .22s ease;
+    }
+    .art-card:nth-child(3n+1) .frame { --tilt: -1.15deg; }
+    .art-card:nth-child(3n+2) .frame { --tilt: .8deg; }
+    .art-card:nth-child(3n+3) .frame { --tilt: -.35deg; }
+    .frame:hover { transform: rotate(0) translateY(-7px); box-shadow: 0 26px 62px rgba(112,75,123,.22); }
+    .frame:focus-visible { outline: 4px solid rgba(154,118,200,.38); outline-offset: 5px; }
+    .frame img { width: 100%; aspect-ratio: var(--ratio, 4/5); object-fit: cover; display: block; background: var(--paper-deep); }
+    .caption { padding: 18px 4px 0; }
+    .caption h2 { margin: 0 0 5px; font-family: Georgia, serif; font-size: clamp(1.3rem, 2.3vw, 1.8rem); font-weight: 500; letter-spacing: -.025em; }
+    .meta { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: .78rem; }
+    .empty { grid-column: 1 / -1; padding: 80px 20px; text-align: center; color: var(--muted); border: 1px dashed var(--line); }
+
+    footer { border-top: 1px solid var(--line); padding: 34px 0 55px; color: var(--muted); font-size: .82rem; display:flex; justify-content:space-between; gap:20px; }
+    footer strong { color: var(--ink); }
+
+    dialog {
+      width: min(1040px, calc(100% - 24px));
+      max-height: calc(100vh - 24px);
+      border: 0;
+      padding: 0;
+      background: #fff9fd;
+      color: var(--ink);
+      box-shadow: 0 35px 100px rgba(0,0,0,.4);
+    }
+    dialog::backdrop { background: rgba(24,22,18,.78); backdrop-filter: blur(5px); }
+    .lightbox-grid { display: grid; grid-template-columns: minmax(0, 1fr) 310px; min-height: 72vh; }
+    .lightbox-art { display: grid; place-items: center; background: #eee4f2; padding: 28px; overflow: hidden; }
+    .lightbox-art img { display: block; max-width: 100%; max-height: calc(100vh - 82px); object-fit: contain; box-shadow: 0 12px 40px rgba(0,0,0,.17); }
+    .lightbox-info { padding: 70px 32px 32px; position: relative; display: flex; flex-direction: column; }
+    .close {
+      position: absolute; right: 19px; top: 18px; width: 44px; height: 44px; border-radius: 50%;
+      background: transparent; border: 1px solid var(--line); cursor: pointer; font-size: 1.4rem;
+    }
+    .close:hover, .close:focus-visible { border-color: var(--ink); outline: none; }
+    .lightbox-info h2 { font: 500 2.1rem/1 Georgia, serif; letter-spacing: -.03em; margin: 0 0 12px; }
+    .lightbox-meta { color: var(--coral); font-size: .8rem; font-weight: 900; text-transform: uppercase; letter-spacing: .1em; }
+    .lightbox-story { margin: 30px 0; color: var(--muted); line-height: 1.65; }
+    .lightbox-nav { display: flex; gap: 10px; margin-top: auto; }
+    .nav-btn { flex: 1; min-height: 44px; background: transparent; border: 1px solid var(--line); cursor: pointer; font-weight: 800; }
+    .nav-btn:hover { border-color: var(--ink); }
+
+    @media (max-width: 800px) {
+      .intro { grid-template-columns: 1fr; gap: 28px; }
+      h1 { font-size: clamp(3.2rem, 17vw, 6rem); }
+      .art-card, .art-card:nth-child(7n + 4), .art-card:nth-child(7n + 5) { grid-column: span 6; }
+      .art-card:nth-child(5n + 2) { margin-top: 34px; }
+      .lightbox-grid { grid-template-columns: 1fr; }
+      .lightbox-art { min-height: 48vh; }
+      .lightbox-art img { max-height: 55vh; }
+      .lightbox-info { padding: 28px; }
+      .close { position: fixed; color: white; border-color: rgba(255,255,255,.5); z-index: 2; }
+      .fairy-crest { margin-left: 0; }
+    }
+    @media (max-width: 520px) {
+      .shell { width: min(100% - 24px, 1180px); }
+      .site-header { min-height: 70px; }
+      .header-note { display: none; }
+      .intro { padding-top: 52px; }
+      .gallery { gap: 42px 14px; }
+      .art-card, .art-card:nth-child(7n + 4), .art-card:nth-child(7n + 5) { grid-column: 1 / -1; margin-top: 0 !important; }
+      .toolbar { align-items: flex-start; }
+      .count { padding-top: 10px; }
+      footer { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="shell site-header">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true"><path d="M12 38c1-11 6-19 15-22 5 3 8 8 8 15-3 7-10 10-23 7Z" fill="#f2d8e7" stroke="currentColor" stroke-width="2"/><path d="m26 16 5-11 2 13M17 25c-5-2-7-6-6-10 5 1 8 3 10 7M17 34c6 1 11-1 15-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="28" cy="23" r="1.2" fill="currentColor"/><path d="M10 36c3 1 5 4 5 7M36 9l1-4m2 6 4-1" stroke="#d978a7" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>Phoebe’s Enchanted Gallery</span>
+    </div>
+    <div class="header-note">A growing collection · Ages 3–6</div>
+  </header>
+
+  <main class="shell">
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">Phoebe’s enchanted art archive</p>
+        <h1 id="page-title">Made with <em>magic.</em></h1>
+      </div>
+      <div class="intro-copy">
+        <div class="fairy-crest" aria-hidden="true">
+          <svg viewBox="0 0 190 112">
+            <g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M49 88c2-28 16-48 40-57 16 5 27 18 26 37-8 18-28 27-66 20Z" fill="#f6dce9"/>
+              <path d="m88 31 15-27 5 32M61 52c-14-5-21-15-18-27 13 2 23 8 29 18M63 76c18 4 33-1 45-15"/>
+              <circle cx="94" cy="51" r="2" fill="currentColor" stroke="none"/>
+              <path d="M47 84c-9 1-17 8-20 19M115 68c14 5 25 2 34-10"/>
+            </g>
+            <g fill="#d978a7"><path d="m25 27 2.5 6 6 2.5-6 2.5-2.5 6-2.5-6-6-2.5 6-2.5Z"/><path d="m154 15 2 5 5 2-5 2-2 5-2-5-5-2 5-2Z"/><circle cx="169" cy="50" r="3"/><circle cx="12" cy="67" r="2.5"/></g>
+            <path d="M128 91q20 8 43-3" fill="none" stroke="#efc875" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 9"/>
+          </svg>
+        </div>
+        <p>Paint splashes, brave lines, tiny stories—and a little fairy-tale magic in everything Phoebe imagines.</p>
+        <label class="upload-label">
+          <span aria-hidden="true">＋</span> Preview your pictures
+          <input id="upload" type="file" accept="image/*" multiple>
+        </label>
+        <small class="privacy-note">Demo mode: selected pictures stay on this device.</small>
+      </div>
+    </section>
+
+    <section aria-label="Artwork collection">
+      <div class="toolbar">
+        <div class="filters" id="filters"></div>
+        <div class="count" id="count" aria-live="polite"></div>
+      </div>
+      <div class="gallery" id="gallery"></div>
+    </section>
+  </main>
+
+  <footer class="shell">
+    <span><strong>Phoebe’s Enchanted Gallery</strong> · Made for family.</span>
+    <span>Every masterpiece holds a little magic.</span>
+  </footer>
+
+  <dialog id="lightbox" aria-labelledby="lightbox-title">
+    <div class="lightbox-grid">
+      <div class="lightbox-art"><img id="lightbox-image" alt=""></div>
+      <div class="lightbox-info">
+        <button class="close" id="close" aria-label="Close artwork">×</button>
+        <div class="lightbox-meta" id="lightbox-meta"></div>
+        <h2 id="lightbox-title"></h2>
+        <p class="lightbox-story" id="lightbox-story"></p>
+        <div class="lightbox-nav">
+          <button class="nav-btn" id="previous">← Previous</button>
+          <button class="nav-btn" id="next">Next →</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+    // EDIT HERE LATER: replace each image value with a path such as "photos/rainbow.jpg".
+    const svg = (content, bg = '#efe6d2', ratio = '4 5') => `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${ratio}" preserveAspectRatio="xMidYMid slice"><rect width="100%" height="100%" fill="${bg}"/>${content}</svg>`)}`;
+
+    const artworks = [
+      { title: 'Beetles in the Magic Garden', year: '2026', medium: 'Paint, crayon & marker', age: 'Age 5', ratio: '2172/3108', story: 'Bright beetles explore a lively garden filled with green leaves, colourful hearts, and warm orange branches.', image: 'photos/beetles.jpg' },
+      { title: 'The Happiest Popcorn', year: '2026', medium: 'Paint, crayon & marker', age: 'Age 5', ratio: '1820/2583', story: 'A cheerful striped popcorn box overflowing with golden popcorn, surrounded by pink, purple, and rainbow-coloured marks.', image: 'photos/popcorn.jpg' },
+      { title: 'The Sweetest Ice-Cream Party', year: '2026', medium: 'Mixed-media craft', age: 'Age 5', ratio: '1800/1348', story: 'Four colourful frozen treats celebrate the message “Summer is coming,” decorated with clay, bright paper, and playful handwritten marks.', image: 'photos/popsicles.jpg' },
+      { title: 'Golden Corn Garden', year: '2025', medium: 'Paint, crayon & collage', age: 'Age 4', ratio: '1800/1186', story: 'Sunny yellow corn kernels bloom beside large green leaves in this cheerful stamped-paint garden.', image: 'photos/corn.jpg' },
+      { title: 'The Shiny Little Pig', year: '2025', medium: 'CD and paper collage', age: 'Age 4', ratio: '3381/2215', story: 'A smiling pig made from a shimmering CD explores a bright turquoise world of colourful crayon marks.', image: 'photos/cd-pig.jpg' },
+      { title: 'Visitor from Sparkle Space', year: '2026', medium: 'Clay and glitter collage', age: 'Age 5', ratio: '1350/1800', story: 'A friendly three-eyed alien arrives from a glittering star world in a colourful red-and-blue rocket.', image: 'photos/alien.jpg' }
+    ];
+
+    const state = { filter: 'All', visible: [], current: 0 };
+    const gallery = document.querySelector('#gallery');
+    const filters = document.querySelector('#filters');
+    const count = document.querySelector('#count');
+    const dialog = document.querySelector('#lightbox');
+    const lbImage = document.querySelector('#lightbox-image');
+    const lbTitle = document.querySelector('#lightbox-title');
+    const lbMeta = document.querySelector('#lightbox-meta');
+    const lbStory = document.querySelector('#lightbox-story');
+
+    function categories() { return ['All', ...new Set(artworks.map(a => a.year))]; }
+    function renderFilters() {
+      filters.innerHTML = categories().map(category => `<button class="filter ${state.filter === category ? 'active' : ''}" data-filter="${category}">${category}</button>`).join('');
+      filters.querySelectorAll('button').forEach(button => button.addEventListener('click', () => {
+        state.filter = button.dataset.filter;
+        render();
+      }));
+    }
+    function render() {
+      state.visible = artworks.filter(a => state.filter === 'All' || a.year === state.filter);
+      renderFilters();
+      count.textContent = `${state.visible.length} ${state.visible.length === 1 ? 'artwork' : 'artworks'}`;
+      gallery.innerHTML = state.visible.length ? state.visible.map((art, index) => `
+        <article class="art-card">
+          <button class="frame" data-index="${index}" aria-label="View ${art.title}">
+            <img src="${art.image}" alt="${art.title}" style="--ratio:${art.ratio}" loading="lazy">
+          </button>
+          <div class="caption">
+            <h2>${art.title}</h2>
+            <div class="meta"><span>${art.medium}</span><span>${art.age} · ${art.year}</span></div>
+          </div>
+        </article>`).join('') : '<div class="empty">No artwork in this year yet.</div>';
+      gallery.querySelectorAll('.frame').forEach(button => button.addEventListener('click', () => openArtwork(Number(button.dataset.index))));
+    }
+    function openArtwork(index) {
+      state.current = (index + state.visible.length) % state.visible.length;
+      const art = state.visible[state.current];
+      lbImage.src = art.image;
+      lbImage.alt = art.title;
+      lbTitle.textContent = art.title;
+      lbMeta.textContent = `${art.medium} · ${art.age} · ${art.year}`;
+      lbStory.textContent = art.story;
+      if (!dialog.open) dialog.showModal();
+    }
+
+    document.querySelector('#close').addEventListener('click', () => dialog.close());
+    document.querySelector('#previous').addEventListener('click', () => openArtwork(state.current - 1));
+    document.querySelector('#next').addEventListener('click', () => openArtwork(state.current + 1));
+    dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+    document.addEventListener('keydown', event => {
+      if (!dialog.open) return;
+      if (event.key === 'ArrowLeft') openArtwork(state.current - 1);
+      if (event.key === 'ArrowRight') openArtwork(state.current + 1);
+    });
+
+    document.querySelector('#upload').addEventListener('change', event => {
+      const files = [...event.target.files];
+      files.forEach((file, index) => artworks.unshift({
+        title: file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '),
+        year: 'My Preview', medium: 'Your picture', age: 'New', ratio: '4/5',
+        story: 'This picture is being previewed locally. Refresh the page to return to the original demo.',
+        image: URL.createObjectURL(file), preview: true
+      }));
+      if (files.length) { state.filter = 'My Preview'; render(); window.scrollTo({ top: document.querySelector('.toolbar').offsetTop, behavior: 'smooth' }); }
+    });
+
+    render();
+  </script>
+</body>
+</html>
