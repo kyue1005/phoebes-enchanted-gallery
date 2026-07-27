@@ -2,6 +2,10 @@
 
 A responsive online gallery celebrating Phoebe’s artwork, with year filters and a full-screen artwork viewer.
 
+**Live site:** https://phoebes-enchanted-gallery.pages.dev/
+
+**Hosting:** Cloudflare Pages
+
 ## View locally
 
 Open `index.html` in Safari, Chrome, or Firefox. No build step or web server is required.
